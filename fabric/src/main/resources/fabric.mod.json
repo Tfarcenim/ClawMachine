@@ -16,8 +16,9 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "com.example.examplemod.ExampleMod"
-        ]
+          "tfar.clawmachine.ClawMachineFabric"
+        ],
+        "client": ["tfar.clawmachine.client.ClawMachineFabricClient"]
     },
     "mixins": [
         "${mod_id}.mixins.json",
@@ -28,9 +29,6 @@
         "fabric-api": "*",
         "minecraft": ">=${minecraft_version}",
         "java": ">=${java_version}"
-    },
-    "suggests": {
-        "another-mod": "*"
     }
 }
   

@@ -1,0 +1,40 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"texture_size": [128, 128],
+	"textures": {
+		"0": "item/clawmachine1/clawmachine1",
+		"particle": "item/clawmachine1/clawmachine1"
+	},
+	"elements": [
+		{
+			"from": [7.5, 6.5, 7.5],
+			"to": [8.5, 16.5, 8.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 17.75, 8]},
+			"faces": {
+				"north": {"uv": [11.375, 1.25, 11.5, 2.5], "texture": "#0"},
+				"east": {"uv": [11.375, 4, 11.5, 5.25], "texture": "#0"},
+				"south": {"uv": [11.375, 5.25, 11.5, 6.5], "texture": "#0"},
+				"west": {"uv": [11.375, 6.5, 11.5, 7.75], "texture": "#0"},
+				"up": {"uv": [6.75, 10.125, 6.625, 10], "texture": "#0"},
+				"down": {"uv": [6.75, 10.125, 6.625, 10.25], "texture": "#0"}
+			}
+		}
+	],
+	"display": {},
+	"groups": [
+		{
+			"name": "crane",
+			"origin": [3, 0, 8],
+			"color": 0,
+			"children": [
+				{
+					"name": "group",
+					"origin": [26.5, 20, 8.5],
+					"color": 0,
+					"children": [0]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "clawmachine:block/clawmachine",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "clawmachine:block/clawmachine"
+    },
+    "facing=south": {
+      "model": "clawmachine:block/clawmachine",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "clawmachine:block/clawmachine",
+      "y": 270
+    }
+  }
+}
