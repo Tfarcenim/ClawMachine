@@ -3,12 +3,10 @@ package tfar.clawmachine;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 public class ClawMachineMenu extends AbstractContainerMenu {
-    protected ClawMachineMenu(int containerId,Inventory inventory) {
+    public ClawMachineMenu(int containerId,Inventory inventory) {
         super(ModMenuTypes.CLAW_MACHINE, containerId);
     }
 
@@ -23,11 +21,27 @@ public class ClawMachineMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        return super.clickMenuButton(player, id);
+        Controls controls = Controls.values()[id];
+
+        switch (controls) {
+            case LEFT -> {
+            }
+            case RIGHT -> {
+            }
+            case FORWARD -> {
+            }
+            case BACK -> {
+            }
+
+            case GRAB -> {
+            }
+        }
+
+        return true;
     }
 
     public enum Controls {
-        UP,DOWN,LEFT,RIGHT,FORWARD,BACK,OPEN,CLOSE
+        LEFT,RIGHT,FORWARD,BACK, GRAB
     }
 
     @Override
