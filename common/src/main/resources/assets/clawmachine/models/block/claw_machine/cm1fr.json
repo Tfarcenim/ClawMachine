@@ -1,0 +1,102 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"texture_size": [128, 128],
+	"textures": {
+		"0": "clawmachine:block/clawmachine1",
+		"particle": "clawmachine:block/clawmachine1"
+	},
+	"elements": [
+		{
+			"from": [1, 12, 4],
+			"to": [16, 16, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, 12, 1]},
+			"faces": {
+				"north": {"uv": [10.75, 8.25, 12.625, 8.75], "texture": "#0"},
+				"west": {"uv": [9.25, 11, 10.75, 11.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "cubeinv",
+			"from": [16, 16, 16],
+			"to": [1, 12, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8.5, 14, 10]},
+			"faces": {
+				"east": {"uv": [9.25, 11.5, 10.75, 11], "texture": "#0"},
+				"south": {"uv": [10.75, 8.75, 12.625, 8.25], "texture": "#0"}
+			}
+		},
+		{
+			"from": [1, 0, 0],
+			"to": [16, 12, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, 0, 1]},
+			"faces": {
+				"north": {"uv": [9.5, 1.5, 11.375, 3], "texture": "#0"},
+				"west": {"uv": [8.75, 8, 10.75, 9.5], "texture": "#0"},
+				"up": {"uv": [9.375, 6, 7.5, 4], "texture": "#0"},
+				"down": {"uv": [9.375, 6, 7.5, 8], "texture": "#0"}
+			}
+		},
+		{
+			"from": [11, 11, 0.5],
+			"to": [14, 13, 3.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 11, 2.5]},
+			"faces": {
+				"north": {"uv": [9.375, 7.75, 9.75, 8], "texture": "#0"},
+				"east": {"uv": [9.75, 7.75, 10.125, 8], "texture": "#0"},
+				"south": {"uv": [10.125, 7.75, 10.5, 8], "texture": "#0"},
+				"west": {"uv": [0.375, 11.5, 0.75, 11.75], "texture": "#0"},
+				"up": {"uv": [11.75, 2.875, 11.375, 2.5], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"firstperson_righthand": {
+			"rotation": [0, 119, 0],
+			"translation": [-1.5, 4, 1.75],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"gui": {
+			"rotation": [25, 145, 0],
+			"translation": [-0.75, -1.75, 0],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"fixed": {
+			"rotation": [-90, 0, 0],
+			"translation": [-24, 0, -30],
+			"scale": [2, 2, 2]
+		}
+	},
+	"groups": [
+		{
+			"name": "clawmachine",
+			"origin": [-3, 0, 1],
+			"color": 0,
+			"children": [
+				{
+					"name": "group 2",
+					"origin": [-3, 0, 1],
+					"color": 0,
+					"children": [
+						{
+							"name": "bone11",
+							"origin": [-3, 12, 1],
+							"color": 0,
+							"children": [
+								0,
+								1,
+								2,
+								{
+									"name": "button",
+									"origin": [8, 11, 2.5],
+									"color": 0,
+									"children": [3]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

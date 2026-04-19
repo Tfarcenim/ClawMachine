@@ -12,6 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import tfar.clawmachine.platform.Services;
+import tfar.clawmachine.state.properties.TripleBlockThird;
 
 public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawMachineBlockEntity> {
     final BlockRenderDispatcher blockRenderDispatcher;
@@ -21,14 +22,14 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
 
     @Override
     public void render(ClawMachineBlockEntity clawMachineBlockEntity,float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        DoubleBlockHalf doubleBlockHalf = clawMachineBlockEntity.getBlockState().getValue(ClawMachineBlock.HALF);
+        TripleBlockThird third = clawMachineBlockEntity.getBlockState().getValue(ClawMachineBlock.THIRD);
 
 
         Level level = clawMachineBlockEntity.getLevel();
         BlockPos pos = clawMachineBlockEntity.getBlockPos();
         VertexConsumer vertexconsumer = bufferSource.getBuffer(RenderType.cutout());
 
-        if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
+        if (third == TripleBlockThird.MIDDLE) {
 
             this.blockRenderDispatcher
                     .getModelRenderer()

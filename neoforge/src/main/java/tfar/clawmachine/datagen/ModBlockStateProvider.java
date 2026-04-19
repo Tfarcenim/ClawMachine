@@ -2,11 +2,12 @@ package tfar.clawmachine.datagen;
 
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import tfar.clawmachine.ClawMachineBlock;
 import tfar.clawmachine.Constants;
 import tfar.clawmachine.ModBlocks;
+import tfar.clawmachine.state.properties.Corner;
+import tfar.clawmachine.state.properties.TripleBlockThird;
 
 public class ModBlockStateProvider extends BlockStateProvider {
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
@@ -15,12 +16,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        ModelFile modelFileLower = models().getExistingFile(modLoc("block/clawmachinebottom"));
-        ModelFile modelFileUpper = models().getExistingFile(modLoc("block/clawmachinetop"));
+        horizontalBlock(ModBlocks.CLAW_MACHINE,state -> {
 
-        horizontalBlock(ModBlocks.CLAW_MACHINE,state -> switch (state.getValue(ClawMachineBlock.HALF)){
-            case UPPER -> modelFileUpper;
-            case LOWER -> modelFileLower;
+            TripleBlockThird third = state.getValue(ClawMachineBlock.THIRD);
+            Corner corner = state.getValue(ClawMachineBlock.CORNER);
+
+            String s = "cm"+third.layer+corner.abr;
+
+            return models().getExistingFile(modLoc("block/claw_machine/"+s));
         });
         //getVariantBuilder(ModBlocks.CLAW_MACHINE).forAllStates(state ->
         //                ConfiguredModel.builder().modelFile(modelFile).build());

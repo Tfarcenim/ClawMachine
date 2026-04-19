@@ -1,0 +1,69 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"texture_size": [128, 128],
+	"textures": {
+		"0": "clawmachine:block/clawmachine1",
+		"particle": "clawmachine:block/clawmachine1"
+	},
+	"elements": [
+		{
+			"from": [1, 0, 0],
+			"to": [16, 16, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8.5, 8, 8]},
+			"faces": {
+				"south": {"uv": [1.875, 6, 3.75, 8], "texture": "#0"},
+				"west": {"uv": [0, 2, 2, 4], "texture": "#0"}
+			}
+		},
+		{
+			"name": "cubeinv",
+			"from": [16, 16, 15.95],
+			"to": [1, 0, -0.05],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8.5, 8, 8]},
+			"faces": {
+				"north": {"uv": [1.875, 8, 3.75, 6], "texture": "#0"},
+				"east": {"uv": [0, 4, 2, 2], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"firstperson_righthand": {
+			"rotation": [0, 119, 0],
+			"translation": [-1.5, 4, 1.75],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"gui": {
+			"rotation": [25, 145, 0],
+			"translation": [-0.75, -1.75, 0],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"fixed": {
+			"rotation": [-90, 0, 0],
+			"translation": [-24, 0, -30],
+			"scale": [2, 2, 2]
+		}
+	},
+	"groups": [
+		{
+			"name": "clawmachine",
+			"origin": [-3, 0, 1],
+			"color": 0,
+			"children": [
+				{
+					"name": "group",
+					"origin": [-3, 28, 1],
+					"color": 0,
+					"children": [
+						{
+							"name": "bone9",
+							"origin": [-3, 12, 1],
+							"color": 0,
+							"children": [0, 1]
+						}
+					]
+				}
+			]
+		}
+	]
+}
