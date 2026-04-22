@@ -3,16 +3,21 @@ package tfar.clawmachine;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ClawMachineMenu extends AbstractContainerMenu {
-    public ClawMachineMenu(int containerId,Inventory inventory) {
+    private final ContainerLevelAccess access;
+
+    public ClawMachineMenu(int containerId, Inventory inventory, ContainerLevelAccess access) {
         super(ModMenuTypes.CLAW_MACHINE, containerId);
+        this.access = access;
     }
 
-   // public ClawMachineMenu(int menuType, Inventory containerId) {
-   //     this(menuType, containerId);
-    //}
+    public ClawMachineMenu(int menuType, Inventory containerId) {
+        this(menuType, containerId,ContainerLevelAccess.NULL);
+    }
 
     @Override
     public ItemStack quickMoveStack(Player player, int i) {
@@ -21,27 +26,24 @@ public class ClawMachineMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        Controls controls = Controls.values()[id];
-
-        switch (controls) {
-            case LEFT -> {
+        access.execute((level, pos) -> {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof ClawMachineBlockEntity clawMachineBlockEntity) {
+                clawMachineBlockEntity.handleInput(id);
             }
-            case RIGHT -> {
-            }
-            case FORWARD -> {
-            }
-            case BACK -> {
-            }
-
-            case GRAB -> {
-            }
-        }
-
+        });
         return true;
     }
 
-    public enum Controls {
-        LEFT,RIGHT,FORWARD,BACK, GRAB
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        access.execute((level, pos) -> {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
+            if (blockEntity instanceof ClawMachineBlockEntity clawMachineBlockEntity) {
+                clawMachineBlockEntity.handleInput(0);
+            }
+        });
     }
 
     @Override

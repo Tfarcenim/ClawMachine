@@ -1,9 +1,11 @@
-package tfar.clawmachine;
+package tfar.clawmachine.client;
 
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
+import tfar.clawmachine.ClawMachine;
+import tfar.clawmachine.ModBlockEntityTypes;
+import tfar.clawmachine.ModMenuTypes;
 
 public class ClawMachineClient {
 
@@ -14,8 +16,8 @@ public class ClawMachineClient {
 
     public static void renderer(){
         BlockEntityRenderers.register(ModBlockEntityTypes.CLAW_MACHINE, ClawMachineBlockEntityRenderer::new);
-
         MenuScreens.register(ModMenuTypes.CLAW_MACHINE,ClawMachineScreen::new);
+        MenuScreens.register(ModMenuTypes.CLAW_MACHINE_LOADER,ClawMachineLoaderScreen::new);
     }
 
 }
