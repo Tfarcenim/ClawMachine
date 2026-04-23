@@ -31,6 +31,7 @@ public class ClawMachine {
     public static void register() {
         ModBlocks.init();
         ModItems.init();
+        ModEntityTypes.init();
         ModBlockEntityTypes.init();
         ModMenuTypes.init();
     }

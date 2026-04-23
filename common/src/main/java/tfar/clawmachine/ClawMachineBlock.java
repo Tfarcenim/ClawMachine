@@ -23,7 +23,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import tfar.clawmachine.state.properties.BProperties;
@@ -240,6 +242,11 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
         placeLayer(level, pos, state, facing);
     }
 
+    //a-b
+    static VoxelShape subtract(VoxelShape a,VoxelShape b) {
+        return Shapes.join(a,b, BooleanOp.ONLY_FIRST);
+    }
+
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         TripleBlockThird third = state.getValue(THIRD);
@@ -254,10 +261,10 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
                     default -> {
                         Corner corner = state.getValue(CORNER);
                         return switch (corner) {
-                            case FRONT_LEFT -> box(0,0,4,15,16,16);
-                            case FRONT_RIGHT -> box(1,0,4,16,16,16);
-                            case BACK_LEFT -> box(0,0,0,15,16,16);
-                            case BACK_RIGHT -> box(1,0,0,16,16,16);
+                            case FRONT_LEFT -> subtract(box(0,0,4,15,16,16),box(0,0,5,14,16,16));
+                            case FRONT_RIGHT -> subtract(box(1,0,4,16,16,16),box(2,0,5,16,16,16));
+                            case BACK_LEFT -> subtract(box(0,0,0,15,16,16),box(0,0,0,14,16,15));
+                            case BACK_RIGHT -> subtract(box(1,0,0,16,16,16),box(2,0,0,16,16,15));
                         };
                     }
                     case EAST -> {

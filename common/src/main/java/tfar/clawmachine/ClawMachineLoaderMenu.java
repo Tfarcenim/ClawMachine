@@ -1,5 +1,8 @@
 package tfar.clawmachine;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -10,6 +13,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class ClawMachineLoaderMenu extends AbstractContainerMenu {
@@ -67,14 +71,36 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
         if (container == this.container && clawMachineBlockEntity != null) {
             ItemStack input = container.getItem(0);
             if (!input.isEmpty()) {
-                Vec3 pos = Vec3.atCenterOf(clawMachineBlockEntity.getBlockPos());
-                ItemEntity itemEntity = new ItemEntity(clawMachineBlockEntity.getLevel(),pos.x,pos.y,pos.z,input);
-                itemEntity.setUnlimitedLifetime();
-                itemEntity.setPickUpDelay(200);
-                clawMachineBlockEntity.getLevel().addFreshEntity(itemEntity);
-                container.setItem(0,ItemStack.EMPTY);
+                spawnPrize(input);
             }
         }
+    }
+
+    void spawnPrize(ItemStack stack) {
+        BlockState state = clawMachineBlockEntity.getBlockState();
+        Direction facing = state.getValue(ClawMachineBlock.FACING);
+        Vec3 pos = pickPos(facing,clawMachineBlockEntity.getBlockPos(),clawMachineBlockEntity.getLevel().random);
+        StaticItemEntity itemEntity = new StaticItemEntity(clawMachineBlockEntity.getLevel(),pos.x,pos.y,pos.z,stack.copyWithCount(1));
+        clawMachineBlockEntity.getLevel().addFreshEntity(itemEntity);
+        container.removeItem(0,1);
+    }
+
+    //inner bounds = 1 3/4s x 1 5/8s
+    Vec3 pickPos(Direction facing, BlockPos controlPos, RandomSource random) {
+        float width = ModEntityTypes.STATIC_ITEM_ENTITY.getDimensions().width();
+        double randX = random.nextDouble() * (52/32d - width/2);
+        double randZ = random.nextDouble() * (48/32d - width/2);
+
+        switch (facing) {
+            case NORTH -> {
+                double x = controlPos.getX() - randX - width/2 + 28/32d;
+
+                double z = controlPos.getZ()+randZ+5/16d + width/2;
+                return new Vec3(x,controlPos.getY()+.75,z);
+            }
+        }
+
+        return new Vec3(controlPos.getX(),controlPos.getY()+.75,controlPos.getZ());
     }
 
     public ClawMachineLoaderMenu(int menuType, Inventory containerId) {
@@ -89,6 +115,6 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        return stillValid(access,player,ModBlocks.CLAW_MACHINE);
     }
 }
