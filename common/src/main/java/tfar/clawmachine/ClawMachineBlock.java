@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -270,28 +269,28 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
                     case EAST -> {
                         Corner corner = state.getValue(CORNER);
                         return switch (corner) {
-                            case FRONT_LEFT -> box(0,0,0,12,16,15);
-                            case FRONT_RIGHT -> box(0,0,1,12,16,16);
-                            case BACK_LEFT -> box(0,0,0,16,16,15);
-                            case BACK_RIGHT -> box(0,0,1,16,16,16);
+                            case FRONT_LEFT -> subtract(box(0,0,0,12,16,15),box(0,0,0,11,16,14));
+                            case FRONT_RIGHT -> subtract(box(0,0,1,12,16,16),box(0,0,2,11,16,16));
+                            case BACK_LEFT -> subtract(box(0,0,0,16,16,15),box(1,0,0,16,16,14));
+                            case BACK_RIGHT -> subtract(box(0,0,1,16,16,16),box(1,0,2,16,16,16));
                         };
                     }
                     case SOUTH -> {
                         Corner corner = state.getValue(CORNER);
                         return switch (corner) {
-                            case FRONT_LEFT -> box(1,0,0,16,16,12);
-                            case FRONT_RIGHT -> box(0,0,0,15,16,12);
-                            case BACK_LEFT -> box(1,0,0,16,16,16);
-                            case BACK_RIGHT -> box(0,0,0,15,16,16);
+                            case FRONT_LEFT -> subtract(box(1,0,0,16,16,12),box(2,0,0,16,16,11));
+                            case FRONT_RIGHT -> subtract(box(0,0,0,15,16,12),box(0,0,0,14,16,11));
+                            case BACK_LEFT -> subtract(box(1,0,0,16,16,16),box(2,0,1,16,16,16));
+                            case BACK_RIGHT -> subtract(box(0,0,0,15,16,16),box(0,0,1,14,16,16));
                         };
                     }
                     case WEST -> {
                         Corner corner = state.getValue(CORNER);
                         return switch (corner) {
-                            case FRONT_LEFT -> box(4,0,1,16,16,16);
-                            case FRONT_RIGHT -> box(4,0,0,16,16,15);
-                            case BACK_LEFT -> box(0,0,1,16,16,16);
-                            case BACK_RIGHT -> box(0,0,0,16,16,15);
+                            case FRONT_LEFT -> subtract(box(4,0,1,16,16,16),box(5,0,2,16,16,16));
+                            case FRONT_RIGHT -> subtract(box(4,0,0,16,16,15),box(5,0,0,16,16,14));
+                            case BACK_LEFT -> subtract(box(0,0,1,16,16,16),box(0,0,2,15,16,16));
+                            case BACK_RIGHT -> subtract(box(0,0,0,16,16,15),box(0,0,0,15,16,14));
                         };
                     }
                 }

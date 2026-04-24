@@ -101,10 +101,11 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         return new ClawMachineLoaderMenu(containerId,playerInventory, ContainerLevelAccess.create(level,worldPosition));
     }
 
+    //red
     public AABB getClawHitbox() {
         double w = 3/8d;
         double o = 5/16d;
-        return new AABB(clawPos.add(o,.0625,o),clawPos.add(w+o,.25,w+o)).move(worldPosition);
+        return new AABB(clawPos.add(o,1/8d,o),clawPos.add(w+o,.25,w+o)).move(worldPosition);
     }
 
     void serverTick() {
@@ -116,7 +117,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
                     //check for overlapping hitboxes
                     ItemStack stack = tryGrab();
                     if (stack.isEmpty()) {
-                        if (clawPos.y <-3/16d) {
+                        if (clawPos.y <=clawYMin) {
                             clawVelocity = new Vec3(0,clawSpeed,0);
                         } else if (clawPos.y >= DEFAULT.y) {
                             clawPos = new Vec3(clawPos.x, DEFAULT.y, clawPos.z);
@@ -169,43 +170,67 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     static final double clawYMin = -3/16d;
+    static final double clawYMax = DEFAULT.y;
 
     public AABB getClawBounds(){
         return switch (getBlockState().getValue(ClawMachineBlock.FACING)) {
             default -> {
-                yield new AABB(-1.125,clawYMin,0,.125,1,1.25);
+                yield new AABB(-1.125,clawYMin,0,.125,clawYMax,1.25);
             }
             case EAST -> {
-                yield new AABB(-2,-2,-2,2,2,2);
+                yield new AABB(-9/8d,clawYMin,-9/8d,1/8d,clawYMax,1/8d);
 
             }
             case SOUTH -> {
-                yield new AABB(-.125,-1,-1.25,1.125,1,0);
+                yield new AABB(-.125,clawYMin,-1.25,1.125,clawYMax,0);
 
             }
             case WEST -> {
-                yield new AABB(-2,-2,-2,2,2,2);
+                yield new AABB(-1/8d,clawYMin,-1/8d,9/8d,clawYMax,9/8d);
             }
         };
     }
 
     public AABB getWinBounds(){
-        return switch (getBlockState().getValue(ClawMachineBlock.FACING)) {
+        double w = 1/4d;
+        Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
+
+        double x = switch (facing) {
             default -> {
-                yield new AABB(5/8d,-.25,.25,7/8d,.125,.5).move(worldPosition);
+                yield 5/8d;
             }
             case EAST -> {
-                yield new AABB(-2,-2,-2,2,2,2);
+                yield 3/8d;
 
             }
             case SOUTH -> {
-                yield new AABB(-.125,-1,-1.25,1.125,0,0);
+                yield 1/8d;
 
             }
             case WEST -> {
-                yield new AABB(-2,-2,-2,2,2,2);
+                yield 5/16d;
             }
         };
+
+        double z = switch (facing) {
+            default -> {
+                yield 5/16d;
+            }
+            case EAST -> {
+                yield 5/8d;
+
+            }
+            case SOUTH -> {
+                yield 7/16d;
+
+            }
+            case WEST -> {
+                yield 1/8d;
+            }
+        };
+
+        AABB box = new AABB(x,-1/4d,z,x+w,1/8d,z+w);
+        return box.move(worldPosition);
     }
 
     void putInBounds() {
@@ -308,7 +333,10 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         }
     }
 
-    public void eject() {
-
+    public void eject(Player player) {
+        List<StaticItemEntity> staticItemEntity = level.getEntitiesOfClass(StaticItemEntity.class,getClawBounds().inflate(1,1,1).move(worldPosition));
+        staticItemEntity.forEach(staticItemEntity1 -> {
+            staticItemEntity1.setPos(player.position());
+        });
     }
 }

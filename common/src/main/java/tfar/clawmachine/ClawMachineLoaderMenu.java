@@ -39,7 +39,7 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
             }
         };
         addSlot(new Slot(container,0,26,45));
-        addSlot(new Slot(container,1,140,40));
+        addSlot(new Slot(container,1,134,47));
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
@@ -57,7 +57,7 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
         switch (id) {
             case 0 ->{
                 if (clawMachineBlockEntity != null) {
-                    clawMachineBlockEntity.eject();
+                    clawMachineBlockEntity.eject(player);
                 }
             }
         }
