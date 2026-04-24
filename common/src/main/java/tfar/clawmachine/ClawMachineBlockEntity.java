@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -137,6 +138,13 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
             }
             setChanged();
         }
+        List<StaticItemEntity> staticItemEntities = level.getEntitiesOfClass(StaticItemEntity.class,getWinBounds());
+        for (StaticItemEntity staticItemEntity : staticItemEntities) {
+            Vec3 pos = Vec3.atBottomCenterOf(worldPosition.relative(getBlockState().getValue(ClawMachineBlock.FACING)));
+            ItemEntity itemEntity = new ItemEntity(level,pos.x,pos.y-.5,pos.z,staticItemEntity.getItem().copy());
+            level.addFreshEntity(itemEntity);
+            staticItemEntity.discard();
+        }
     }
 
     ItemStack tryGrab() {
@@ -154,16 +162,18 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     boolean updateClawPos() {
         boolean moved = !Vec3.ZERO.equals(clawVelocity);
         clawPos = clawPos.add(clawVelocity);
-        if (!getBounds().contains(clawPos)) {
+        if (!getClawBounds().contains(clawPos)) {
             putInBounds();
         }
         return moved;
     }
 
-    AABB getBounds(){
+    static final double clawYMin = -3/16d;
+
+    public AABB getClawBounds(){
         return switch (getBlockState().getValue(ClawMachineBlock.FACING)) {
             default -> {
-                yield new AABB(-1.125,-1,0,.125,1,1.25);
+                yield new AABB(-1.125,clawYMin,0,.125,1,1.25);
             }
             case EAST -> {
                 yield new AABB(-2,-2,-2,2,2,2);
@@ -179,8 +189,27 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         };
     }
 
+    public AABB getWinBounds(){
+        return switch (getBlockState().getValue(ClawMachineBlock.FACING)) {
+            default -> {
+                yield new AABB(5/8d,-.25,.25,7/8d,.125,.5).move(worldPosition);
+            }
+            case EAST -> {
+                yield new AABB(-2,-2,-2,2,2,2);
+
+            }
+            case SOUTH -> {
+                yield new AABB(-.125,-1,-1.25,1.125,0,0);
+
+            }
+            case WEST -> {
+                yield new AABB(-2,-2,-2,2,2,2);
+            }
+        };
+    }
+
     void putInBounds() {
-        AABB bounds = getBounds();
+        AABB bounds = getClawBounds();
         double x = Math.clamp(clawPos.x,bounds.minX,bounds.maxX);
         double y = Math.clamp(clawPos.y,bounds.minY,bounds.maxY);
         double z = Math.clamp(clawPos.z,bounds.minZ,bounds.maxZ);

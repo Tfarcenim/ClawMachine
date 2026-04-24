@@ -19,7 +19,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import tfar.clawmachine.ClawMachineBlockEntity;
@@ -114,7 +113,7 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
         if (!itemstack.isEmpty()) {
             poseStack.pushPose();
 
-            this.random.setSeed(StaticItemEntityRenderer.getSeedForItemStack(itemstack));
+            this.random.setSeed(ItemEntityRenderer.getSeedForItemStack(itemstack));
             BakedModel bakedmodel = this.itemRenderer.getModel(itemstack, level, null, 0);
             boolean flag = bakedmodel.isGui3d();
             float f = 0.25F;
@@ -132,18 +131,31 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
 
 
         VertexConsumer consumer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
-
-        drawRenderBoundingBox(poseStack,consumer,clawMachineBlockEntity );
+        if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+            drawRenderBoundingBox(poseStack, consumer, clawMachineBlockEntity);
+        }
 
     }
 
     private void drawRenderBoundingBox(PoseStack poseStack, VertexConsumer consumer, ClawMachineBlockEntity be) {
         AABB aabb = be.getClawHitbox();
+        BlockPos pos = be.getBlockPos();
 
         poseStack.pushPose();
-        BlockPos pos = be.getBlockPos();
         poseStack.translate(-pos.getX(),-pos.getY(),-pos.getZ());
         LevelRenderer.renderLineBox(poseStack, consumer, aabb, 1F, 0F, 0F, 1F);
+        poseStack.popPose();
+
+        poseStack.pushPose();
+        AABB aabb1 = be.getWinBounds();
+        poseStack.translate(-pos.getX(),-pos.getY(),-pos.getZ());
+        LevelRenderer.renderLineBox(poseStack, consumer,aabb1 , 0F, 1F, 0F, 1F);
+        poseStack.popPose();
+
+        poseStack.pushPose();
+        AABB aabb2 = be.getClawBounds();
+        poseStack.translate(.5,0,.5);
+        LevelRenderer.renderLineBox(poseStack, consumer,aabb2 , 1F, 1F, 0F, 1F);
         poseStack.popPose();
     }
 
