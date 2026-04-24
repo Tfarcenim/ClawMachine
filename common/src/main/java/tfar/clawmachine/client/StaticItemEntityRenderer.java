@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -48,7 +49,7 @@ public class StaticItemEntityRenderer extends EntityRenderer<StaticItemEntity> {
         poseStack.translate(0.0F, f1 + 0.25F * f2*0, 0.0F);
         float f3 = 0;//entity.getSpin(partialTicks);
         poseStack.mulPose(Axis.YP.rotation(f3));
-        renderMultipleFromCount(this.itemRenderer, poseStack, buffer, packedLight, itemstack, bakedmodel, flag, this.random);
+        ItemEntityRenderer.renderMultipleFromCount(this.itemRenderer, poseStack, buffer, packedLight, itemstack, bakedmodel, flag, this.random);
         poseStack.popPose();
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
@@ -73,7 +74,7 @@ public class StaticItemEntityRenderer extends EntityRenderer<StaticItemEntity> {
             ItemRenderer itemRenderer, PoseStack poseStack, MultiBufferSource buffer, int packedLight, ItemStack item, RandomSource random, Level level
     ) {
         BakedModel bakedmodel = itemRenderer.getModel(item, level, null, 0);
-        renderMultipleFromCount(itemRenderer, poseStack, buffer, packedLight, item, bakedmodel, bakedmodel.isGui3d(), random);
+        ItemEntityRenderer.renderMultipleFromCount(itemRenderer, poseStack, buffer, packedLight, item, bakedmodel, bakedmodel.isGui3d(), random);
     }
 
     public static void renderMultipleFromCount(

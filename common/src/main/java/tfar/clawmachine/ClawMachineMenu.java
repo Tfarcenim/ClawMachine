@@ -48,6 +48,6 @@ public class ClawMachineMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return true;
+        return stillValid(access,player,ModBlocks.CLAW_MACHINE);
     }
 }

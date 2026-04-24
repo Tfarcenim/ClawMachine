@@ -5,11 +5,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -121,6 +124,45 @@ public class StaticItemEntity extends Entity {
     @Override
     public boolean isAttackable() {
         return false;
+    }
+
+    @Override
+    public boolean canCollideWith(Entity entity) {
+        return canVehicleCollide(this, entity);
+    }
+
+    public static boolean canVehicleCollide(Entity vehicle, Entity entity) {
+        return (entity.canBeCollidedWith() || entity.isPushable()) && !vehicle.isPassengerOfSameVehicle(entity);
+    }
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return true;
+    }
+
+    @Override
+    public void playerTouch(Player player) {
+        super.playerTouch(player);BlockPos pos = blockPosition();
+        if (!this.level().isClientSide && !level().getBlockState(pos).is(ModBlocks.CLAW_MACHINE) ) {
+            ItemStack itemstack = this.getItem();
+            Item item = itemstack.getItem();
+            int i = itemstack.getCount();
+            if (player.getInventory().add(itemstack)) {
+                player.take(this, i);
+                if (itemstack.isEmpty()) {
+                    this.discard();
+                    itemstack.setCount(i);
+                }
+
+                player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+                //player.onItemPickup(this);
+            }
+        }
     }
 
     @Override

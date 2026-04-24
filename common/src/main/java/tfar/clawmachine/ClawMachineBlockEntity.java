@@ -21,19 +21,25 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider {
 
 
-    public Vec3 clawPos = Vec3.ZERO;
-    public Vec3 prevClawPos = Vec3.ZERO;
+    public static final Vec3 DEFAULT = new Vec3(0,.5,0);
+    public Vec3 clawPos = DEFAULT;
+    public Vec3 prevClawPos = DEFAULT;
 
     Vec3 clawVelocity = Vec3.ZERO;
 
     public boolean clawClosed;
+    public ItemStack grabbedItem = ItemStack.EMPTY;
+
+    boolean grabbing;
+    int grabTimer;
+
 
     int ticksSinceGrab;
-
-    ItemStack grabbed = ItemStack.EMPTY;
 
     public ClawMachineBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntityTypes.CLAW_MACHINE, pos, blockState);
@@ -48,11 +54,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         t.putDouble("z",clawPos.z);
         tag.put("claw_pos",t);
         tag.putBoolean("claw_closed", clawClosed);
-    }
-
-    public void processControls(double x,double y,double z) {
-        clawPos.add(x,y,z);
-        setChanged();
+        tag.put("grabbed_item",grabbedItem.saveOptional(registries));
     }
 
     @Override
@@ -62,6 +64,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         CompoundTag t = tag.getCompound("claw_pos");
         clawPos = new Vec3(t.getDouble("x"),t.getDouble("y"),t.getDouble("z"));
         prevClawPos = clawPos;
+        grabbedItem = ItemStack.parseOptional(registries,tag.getCompound("grabbed_item"));
     }
 
     @Nullable
@@ -97,12 +100,55 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         return new ClawMachineLoaderMenu(containerId,playerInventory, ContainerLevelAccess.create(level,worldPosition));
     }
 
+    public AABB getClawHitbox() {
+        double w = 3/8d;
+        double o = 5/16d;
+        return new AABB(clawPos.add(o,.0625,o),clawPos.add(w+o,.25,w+o)).move(worldPosition);
+    }
+
     void serverTick() {
         boolean moved = updateClawPos();
         if (moved) {
             prevClawPos = clawPos;
+            if (grabbing) {
+                if (grabbedItem.isEmpty()) {
+                    //check for overlapping hitboxes
+                    ItemStack stack = tryGrab();
+                    if (stack.isEmpty()) {
+                        if (clawPos.y <-3/16d) {
+                            clawVelocity = new Vec3(0,clawSpeed,0);
+                        } else if (clawPos.y >= DEFAULT.y) {
+                            clawPos = new Vec3(clawPos.x, DEFAULT.y, clawPos.z);
+                            grabbing = false;
+                            clawVelocity = Vec3.ZERO;
+                        }
+                    } else {
+                        grabbedItem = stack;
+                        clawClosed = true;
+                        clawVelocity = new Vec3(0,clawSpeed,0);
+                    }
+                } else {
+                    if (clawPos.y >= DEFAULT.y) {
+                        clawPos = new Vec3(clawPos.x, DEFAULT.y, clawPos.z);
+                        grabbing = false;
+                        clawVelocity = Vec3.ZERO;
+                    }
+                }
+            }
             setChanged();
         }
+    }
+
+    ItemStack tryGrab() {
+        AABB clawHitbox = getClawHitbox();
+        List<StaticItemEntity> staticItemEntities = level.getEntitiesOfClass(StaticItemEntity.class,clawHitbox);
+        if (!staticItemEntities.isEmpty()) {
+            StaticItemEntity staticItemEntity = staticItemEntities.getFirst();
+            ItemStack stack = staticItemEntity.getItem().copy();
+            staticItemEntity.discard();
+            return stack;
+        }
+        return ItemStack.EMPTY;
     }
 
     boolean updateClawPos() {
@@ -149,6 +195,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     public void handleInput(int id) {
         Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
+        if (grabbing) {return;}
         switch (id) {
             default -> clawVelocity = Vec3.ZERO;
             case 0 -> clawVelocity = Vec3.ZERO;
@@ -217,7 +264,17 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
                 }
             }
             case 9 -> {// grab/release
-
+                if (grabbedItem.isEmpty()) {//don't process if already grabbing
+                    grabbing = true;
+                    clawVelocity = new Vec3(0,-clawSpeed/2,0);
+                } else {
+                    Vec3 spawn = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
+                    StaticItemEntity staticItemEntity = new StaticItemEntity(level,spawn.x+.5,spawn.y,spawn.z+.5,grabbedItem.copy());
+                    level.addFreshEntity(staticItemEntity);
+                    clawClosed = false;
+                    grabbedItem = ItemStack.EMPTY;
+                    setChanged();
+                }
             }
         }
     }
