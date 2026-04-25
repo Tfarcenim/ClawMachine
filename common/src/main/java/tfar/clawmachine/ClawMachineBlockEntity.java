@@ -178,24 +178,24 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     public AABB getWinBounds(){
-        double w = 1/4d;
+        double w = 3/8d;
         Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
 
         double x = switch (facing) {
-            default -> 5/8d;
-            case EAST -> 3/8d;
+            default -> 4/8d;
+            case EAST -> 5/16d;
             case SOUTH -> 1/8d;
             case WEST -> 5/16d;
         };
 
         double z = switch (facing) {
             default -> 5/16d;
-            case EAST -> 5/8d;
-            case SOUTH -> 7/16d;
+            case EAST -> 4/8d;
+            case SOUTH -> 5/16d;
             case WEST -> 1/8d;
         };
 
-        AABB box = new AABB(x,-1/4d,z,x+w,1/8d,z+w);
+        AABB box = new AABB(x,-1/4d,z,x+w,0,z+w);
         return box.move(worldPosition);
     }
 
