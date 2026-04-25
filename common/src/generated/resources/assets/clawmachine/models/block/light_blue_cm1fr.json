@@ -1,0 +1,7 @@
+{
+  "parent": "clawmachine:block/claw_machine/cm1fr",
+  "textures": {
+    "0": "clawmachine:block/light_blue_claw_machine",
+    "particle": "clawmachine:block/light_blue_claw_machine"
+  }
+}

@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class ClawMachineLoaderMenu extends AbstractContainerMenu {
@@ -152,6 +151,6 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(access,player,ModBlocks.CLAW_MACHINE);
+        return ClawMachineMenu.stillValid(access,player);
     }
 }

@@ -5,6 +5,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ClawMachineMenu extends AbstractContainerMenu {
@@ -48,6 +49,13 @@ public class ClawMachineMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(access,player,ModBlocks.CLAW_MACHINE);
+        return stillValid(access,player);
+    }
+
+    protected static boolean stillValid(ContainerLevelAccess access, Player player) {
+        return access.evaluate(
+                (p_339522_, p_339523_) -> p_339522_.getBlockState(p_339523_).getBlock()
+                        instanceof ClawMachineBlock && player.canInteractWithBlock(p_339523_, 4.0), true
+        );
     }
 }

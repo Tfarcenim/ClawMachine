@@ -19,6 +19,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import tfar.clawmachine.ClawMachineBlockEntity;
@@ -51,13 +53,16 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
 
         poseStack.translate(d0,0,d2);
 
-        //not affected by y translations
+        BlockState dummy = Blocks.STONE.defaultBlockState();//I don't think this matters does it?
+
+
+                //not affected by y translations
         this.blockRenderDispatcher
                 .getModelRenderer()
                 .tesselateBlock(
                         level,
                         Services.PLATFORM.getModel(ClawMachineClient.TOP),
-                        ModBlocks.CLAW_MACHINE.defaultBlockState(),
+                        dummy,
                         pos,
                         poseStack,
                         vertexconsumer,
@@ -75,7 +80,7 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
                 .tesselateBlock(
                         level,
                         clawMachineBlockEntity.clawClosed ? Services.PLATFORM.getModel(ClawMachineClient.CLOSED): Services.PLATFORM.getModel(ClawMachineClient.OPEN),
-                        ModBlocks.CLAW_MACHINE.defaultBlockState(),
+                        dummy,
                         pos,
                         poseStack,
                         vertexconsumer,
@@ -95,7 +100,7 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
                     .tesselateBlock(
                             level,
                             Services.PLATFORM.getModel(ClawMachineClient.CABLE),
-                            ModBlocks.CLAW_MACHINE.defaultBlockState(),
+                            dummy,
                             pos,
                             poseStack,
                             vertexconsumer,

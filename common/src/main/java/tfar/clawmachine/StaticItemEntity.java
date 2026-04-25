@@ -6,8 +6,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
@@ -150,7 +148,7 @@ public class StaticItemEntity extends Entity {
     @Override
     public void playerTouch(Player player) {
         super.playerTouch(player);BlockPos pos = blockPosition();
-        if (!this.level().isClientSide && !level().getBlockState(pos).is(ModBlocks.CLAW_MACHINE) ) {
+        if (!this.level().isClientSide && !(level().getBlockState(pos).getBlock() instanceof ClawMachineBlock) ) {
             ItemStack itemstack = this.getItem();
             Item item = itemstack.getItem();
             int i = itemstack.getCount();

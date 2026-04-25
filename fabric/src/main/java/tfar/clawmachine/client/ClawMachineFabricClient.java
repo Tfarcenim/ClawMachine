@@ -9,7 +9,7 @@ import tfar.clawmachine.ModBlocks;
 public class ClawMachineFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.CLAW_MACHINE, RenderType.cutout());
+        ModBlocks.CLAW_MACHINES.forEach(b -> BlockRenderLayerMap.INSTANCE.putBlock(b, RenderType.cutout()));
         ClawMachineClient.renderer();
         ModelLoadingPlugin.register(new ModelLoadingPlugin() {
             @Override
