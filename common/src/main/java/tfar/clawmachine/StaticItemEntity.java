@@ -135,14 +135,16 @@ public class StaticItemEntity extends Entity {
         return (entity.canBeCollidedWith() || entity.isPushable()) && !vehicle.isPassengerOfSameVehicle(entity);
     }
 
+    public static boolean COLLISION = false;
+
     @Override
     public boolean canBeCollidedWith() {
-        return true;
+        return COLLISION;
     }
 
     @Override
     public boolean isPushable() {
-        return true;
+        return COLLISION;
     }
 
     @Override

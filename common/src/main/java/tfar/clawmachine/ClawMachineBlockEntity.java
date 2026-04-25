@@ -37,10 +37,6 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     public ItemStack grabbedItem = ItemStack.EMPTY;
 
     boolean grabbing;
-    int grabTimer;
-
-
-    int ticksSinceGrab;
 
     public ClawMachineBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntityTypes.CLAW_MACHINE, pos, blockState);
@@ -174,20 +170,10 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     public AABB getClawBounds(){
         return switch (getBlockState().getValue(ClawMachineBlock.FACING)) {
-            default -> {
-                yield new AABB(-1.125,clawYMin,0,.125,clawYMax,1.25);
-            }
-            case EAST -> {
-                yield new AABB(-9/8d,clawYMin,-9/8d,1/8d,clawYMax,1/8d);
-
-            }
-            case SOUTH -> {
-                yield new AABB(-.125,clawYMin,-1.25,1.125,clawYMax,0);
-
-            }
-            case WEST -> {
-                yield new AABB(-1/8d,clawYMin,-1/8d,9/8d,clawYMax,9/8d);
-            }
+            default -> new AABB(-1.125,clawYMin,0,.125,clawYMax,1.25);
+            case EAST -> new AABB(-9/8d,clawYMin,-9/8d,1/8d,clawYMax,1/8d);
+            case SOUTH -> new AABB(-.125,clawYMin,-1.25,1.125,clawYMax,0);
+            case WEST -> new AABB(-1/8d,clawYMin,-1/8d,9/8d,clawYMax,9/8d);
         };
     }
 
@@ -196,37 +182,17 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
 
         double x = switch (facing) {
-            default -> {
-                yield 5/8d;
-            }
-            case EAST -> {
-                yield 3/8d;
-
-            }
-            case SOUTH -> {
-                yield 1/8d;
-
-            }
-            case WEST -> {
-                yield 5/16d;
-            }
+            default -> 5/8d;
+            case EAST -> 3/8d;
+            case SOUTH -> 1/8d;
+            case WEST -> 5/16d;
         };
 
         double z = switch (facing) {
-            default -> {
-                yield 5/16d;
-            }
-            case EAST -> {
-                yield 5/8d;
-
-            }
-            case SOUTH -> {
-                yield 7/16d;
-
-            }
-            case WEST -> {
-                yield 1/8d;
-            }
+            default -> 5/16d;
+            case EAST -> 5/8d;
+            case SOUTH -> 7/16d;
+            case WEST -> 1/8d;
         };
 
         AABB box = new AABB(x,-1/4d,z,x+w,1/8d,z+w);

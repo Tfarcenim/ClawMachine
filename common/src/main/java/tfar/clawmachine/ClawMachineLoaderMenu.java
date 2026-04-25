@@ -13,6 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class ClawMachineLoaderMenu extends AbstractContainerMenu {
@@ -87,19 +88,56 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
     //inner bounds = 1 3/4s x 1 5/8s
     Vec3 pickPos(Direction facing, BlockPos controlPos, RandomSource random) {
         float width = ModEntityTypes.STATIC_ITEM_ENTITY.getDimensions().width();
-        double randX = random.nextDouble() * (52/32d - width/2);
-        double randZ = random.nextDouble() * (48/32d - width/2);
 
-        switch (facing) {
-            case NORTH -> {
-                double x = controlPos.getX() - randX - width/2 + 28/32d;
+        int tries = 0;
 
-                double z = controlPos.getZ()+randZ+5/16d + width/2;
-                return new Vec3(x,controlPos.getY()+.75,z);
-            }
+        while (true) {
+            tries++;
+
+
+            double randX = random.nextDouble() * (26/16d - width/2);
+            double randZ = random.nextDouble() * (24/16d - width/2);
+
+            Vec3 potential = switch (facing) {
+                case NORTH -> {
+                    double x = controlPos.getX() - randX - width/2 + 14/16d;
+
+                    double z = controlPos.getZ()+randZ+5/16d + width/2;
+                    yield  new Vec3(x,controlPos.getY()+5/8d,z);
+                }
+
+                case EAST -> {
+                    double x = controlPos.getX() - randZ - width/2 + 14/16d;
+
+                    double z = controlPos.getZ()+randX+5/16d + width/2;
+                    yield  new Vec3(x,controlPos.getY()+5/8d,z);
+                }
+
+                case SOUTH -> {
+                    double x = controlPos.getX() + randX + width/2 + 2/16d;
+
+                    double z = controlPos.getZ()-randZ + 7/16d + width/2;
+                    yield  new Vec3(x,controlPos.getY()+5/8d,z);
+                }
+
+                case WEST -> {
+                    double x = controlPos.getX() + randZ - width/2 + 9/16d;
+
+                    double z = controlPos.getZ()+randX+2/16d + width/2;
+                    yield  new Vec3(x,controlPos.getY()+5/8d,z);
+                }
+
+                default -> Vec3.ZERO;
+            };
+
+            return potential;
+
+
+         //   if (tries > 100) return new Vec3(controlPos.getX()+.5,controlPos.getY()+.75,controlPos.getZ()+.5);
+
         }
 
-        return new Vec3(controlPos.getX(),controlPos.getY()+.75,controlPos.getZ());
+
     }
 
     public ClawMachineLoaderMenu(int menuType, Inventory containerId) {
