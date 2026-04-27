@@ -27,19 +27,30 @@ import java.util.List;
 public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider {
 
 
-    public static final Vec3 DEFAULT = new Vec3(0,.5,0);
-    public Vec3 clawPos = DEFAULT;
-    public Vec3 prevClawPos = DEFAULT;
+    public Vec3 clawPos;
+    public Vec3 prevClawPos;
 
     Vec3 clawVelocity = Vec3.ZERO;
+    final Vec3 defaultClawPos;
 
     public boolean clawClosed;
     public ItemStack grabbedItem = ItemStack.EMPTY;
 
-    boolean grabbing;
+    boolean moveToStart;
 
     public ClawMachineBlockEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntityTypes.CLAW_MACHINE, pos, blockState);
+        clawBounds = getClawBounds();
+        winBounds = getWinBounds();
+        defaultClawPos = getDefaultClawPos(blockState.getValue(ClawMachineBlock.FACING));
+        clawPos = defaultClawPos;
+        prevClawPos = defaultClawPos;
+    }
+
+    Vec3 getDefaultClawPos(Direction facing) {
+        return switch (facing) {
+            default -> new Vec3(0,.5,0);
+        };
     }
 
     @Override
@@ -62,6 +73,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         clawPos = new Vec3(t.getDouble("x"),t.getDouble("y"),t.getDouble("z"));
         prevClawPos = clawPos;
         grabbedItem = ItemStack.parseOptional(registries,tag.getCompound("grabbed_item"));
+
     }
 
     @Nullable
@@ -98,9 +110,12 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     //red
+    // 0 to .5
+    // .5 to .25
+    //1 to 0
     public AABB getClawHitbox() {
-        double w = 3/8d;
-        double o = 5/16d;
+        double w = 3/16d;
+        double o = .5 - w/2;
         return new AABB(clawPos.add(o,1/8d,o),clawPos.add(w+o,.25,w+o)).move(worldPosition);
     }
 
@@ -108,16 +123,16 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         boolean moved = updateClawPos();
         if (moved) {
             prevClawPos = clawPos;
-            if (grabbing) {
+            if (moveToStart) {
                 if (grabbedItem.isEmpty()) {
                     //check for overlapping hitboxes
                     ItemStack stack = tryGrab();
                     if (stack.isEmpty()) {
                         if (clawPos.y <=clawYMin) {
                             clawVelocity = new Vec3(0,clawSpeed,0);
-                        } else if (clawPos.y >= DEFAULT.y) {
-                            clawPos = new Vec3(clawPos.x, DEFAULT.y, clawPos.z);
-                            grabbing = false;
+                        } else if (clawPos.y >= .5) {
+                            clawPos = new Vec3(clawPos.x, .5, clawPos.z);
+                            moveToStart = false;
                             clawVelocity = Vec3.ZERO;
                         }
                     } else {
@@ -126,16 +141,16 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
                         clawVelocity = new Vec3(0,clawSpeed,0);
                     }
                 } else {
-                    if (clawPos.y >= DEFAULT.y) {
-                        clawPos = new Vec3(clawPos.x, DEFAULT.y, clawPos.z);
-                        grabbing = false;
+                    if (clawPos.y >= .5) {
+                        clawPos = new Vec3(clawPos.x, .5, clawPos.z);
+                        moveToStart = false;
                         clawVelocity = Vec3.ZERO;
                     }
                 }
             }
             setChanged();
         }
-        List<StaticItemEntity> staticItemEntities = level.getEntitiesOfClass(StaticItemEntity.class,getWinBounds());
+        List<StaticItemEntity> staticItemEntities = level.getEntitiesOfClass(StaticItemEntity.class,winBounds);
         for (StaticItemEntity staticItemEntity : staticItemEntities) {
             Vec3 pos = Vec3.atBottomCenterOf(worldPosition.relative(getBlockState().getValue(ClawMachineBlock.FACING)));
             ItemEntity itemEntity = new ItemEntity(level,pos.x,pos.y-.5,pos.z,staticItemEntity.getItem().copy());
@@ -166,18 +181,22 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     static final double clawYMin = -3/16d;
-    static final double clawYMax = DEFAULT.y;
+    static final double clawYMax = .5;
 
-    public AABB getClawBounds(){
+    public final AABB clawBounds;
+
+    private AABB getClawBounds(){
         return switch (getBlockState().getValue(ClawMachineBlock.FACING)) {
             default -> new AABB(-1.125,clawYMin,0,.125,clawYMax,1.25);
-            case EAST -> new AABB(-9/8d,clawYMin,-9/8d,1/8d,clawYMax,1/8d);
+            case EAST -> new AABB(-9/8d,clawYMin,-9/8d,-1/16d,clawYMax,1/8d);
             case SOUTH -> new AABB(-.125,clawYMin,-1.25,1.125,clawYMax,0);
-            case WEST -> new AABB(-1/8d,clawYMin,-1/8d,9/8d,clawYMax,9/8d);
+            case WEST -> new AABB(1/16d,clawYMin,-1/8d,9/8d,clawYMax,9/8d);
         };
     }
 
-    public AABB getWinBounds(){
+    public final AABB winBounds;
+
+    private AABB getWinBounds(){
         double w = 3/8d;
         Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
 
@@ -215,7 +234,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     public void handleInput(int id) {
         Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
-        if (grabbing) {return;}
+        if (moveToStart) {return;}
         switch (id) {
             default -> clawVelocity = Vec3.ZERO;
             case 0 -> clawVelocity = Vec3.ZERO;
@@ -285,7 +304,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
             }
             case 9 -> {// grab/release
                 if (grabbedItem.isEmpty()) {//don't process if already grabbing
-                    grabbing = true;
+                    moveToStart = true;
                     clawVelocity = new Vec3(0,-clawSpeed/2,0);
                 } else {
                     Vec3 spawn = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());

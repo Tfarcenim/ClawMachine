@@ -293,22 +293,22 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
                         case BACK_RIGHT -> subtract(box(1,0,0,16,16,16),box(2,12,0,16,16,15));
                     };
                     case EAST -> switch (corner) {
-                        case FRONT_LEFT -> subtract(box(0,0,0,12,16,15),box(0,0,0,11,16,14));
-                        case FRONT_RIGHT -> subtract(box(0,0,1,12,16,16),box(0,0,2,11,16,16));
-                        case BACK_LEFT -> subtract(box(0,0,0,16,16,15),box(1,0,0,16,16,14));
-                        case BACK_RIGHT -> subtract(box(0,0,1,16,16,16),box(1,0,2,16,16,16));
+                        case FRONT_LEFT -> subtract(box(0,0,0,12,16,15),box(0,12,0,11,16,14));
+                        case FRONT_RIGHT -> subtract(box(0,0,1,12,16,16),box(0,12,2,11,16,16));
+                        case BACK_LEFT -> subtract(box(0,0,0,16,16,15),box(1,12,0,16,16,14));
+                        case BACK_RIGHT -> subtract(box(0,0,1,16,16,16),box(1,12,2,16,16,16));
                     };
                     case SOUTH -> switch (corner) {
-                        case FRONT_LEFT -> subtract(box(1,0,0,16,16,12),box(2,0,0,16,16,11));
-                        case FRONT_RIGHT -> subtract(box(0,0,0,15,16,12),box(0,0,0,14,16,11));
-                        case BACK_LEFT -> subtract(box(1,0,0,16,16,16),box(2,0,1,16,16,16));
-                        case BACK_RIGHT -> subtract(box(0,0,0,15,16,16),box(0,0,1,14,16,16));
+                        case FRONT_LEFT -> subtract(box(1,0,0,16,16,12),box(2,12,0,16,16,11));
+                        case FRONT_RIGHT -> subtract(box(0,0,0,15,16,12),box(0,12,0,14,16,11));
+                        case BACK_LEFT -> subtract(box(1,0,0,16,16,16),box(2,12,1,16,16,16));
+                        case BACK_RIGHT -> subtract(box(0,0,0,15,16,16),box(0,12,1,14,16,16));
                     };
                     case WEST -> switch (corner) {
-                        case FRONT_LEFT -> subtract(box(4,0,1,16,16,16),box(5,0,2,16,16,16));
-                        case FRONT_RIGHT -> subtract(box(4,0,0,16,16,15),box(5,0,0,16,16,14));
-                        case BACK_LEFT -> subtract(box(0,0,1,16,16,16),box(0,0,2,15,16,16));
-                        case BACK_RIGHT -> subtract(box(0,0,0,16,16,15),box(0,0,0,15,16,14));
+                        case FRONT_LEFT -> subtract(box(4,0,1,16,16,16),box(5,12,2,16,16,16));
+                        case FRONT_RIGHT -> subtract(box(4,0,0,16,16,15),box(5,12,0,16,16,14));
+                        case BACK_LEFT -> subtract(box(0,0,1,16,16,16),box(0,12,2,15,16,16));
+                        case BACK_RIGHT -> subtract(box(0,0,0,16,16,15),box(0,12,0,15,16,14));
                     };
                 };
             }

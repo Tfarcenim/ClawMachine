@@ -152,13 +152,13 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
         poseStack.popPose();
 
         poseStack.pushPose();
-        AABB aabb1 = be.getWinBounds();
+        AABB aabb1 = be.winBounds;
         poseStack.translate(-pos.getX(),-pos.getY(),-pos.getZ());
         LevelRenderer.renderLineBox(poseStack, consumer,aabb1 , 0F, 1F, 0F, 1F);
         poseStack.popPose();
 
         poseStack.pushPose();
-        AABB aabb2 = be.getClawBounds();
+        AABB aabb2 = be.clawBounds;
         poseStack.translate(.5,0,.5);
         LevelRenderer.renderLineBox(poseStack, consumer,aabb2 , 1F, 1F, 0F, 1F);
         poseStack.popPose();
