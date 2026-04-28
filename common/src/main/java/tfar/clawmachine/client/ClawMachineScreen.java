@@ -5,8 +5,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.lwjgl.glfw.GLFW;
+import tfar.clawmachine.ClawMachine;
 import tfar.clawmachine.ClawMachineMenu;
 import tfar.clawmachine.HoldingButton;
 
@@ -15,6 +17,8 @@ public class ClawMachineScreen extends AbstractContainerScreen<ClawMachineMenu> 
         super(menu, playerInventory, title);
     }
 
+    public static final ResourceLocation BACKGROUND = ClawMachine.id("background");
+
     protected HoldingButton forwardButton;
     protected HoldingButton backButton;
     protected HoldingButton leftButton;
@@ -22,7 +26,9 @@ public class ClawMachineScreen extends AbstractContainerScreen<ClawMachineMenu> 
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float v, int i, int i1) {
-
+        int w = 150;
+        int midX = width/2 - w/2;
+        guiGraphics.blitSprite(BACKGROUND,midX,topPos+96,w,66);
     }
 
     @Override
@@ -32,7 +38,7 @@ public class ClawMachineScreen extends AbstractContainerScreen<ClawMachineMenu> 
 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-
+        guiGraphics.drawString(font,"Credits: "+menu.getCredits(),100,106,0x007f00,false);
     }
 
     @Override
@@ -44,21 +50,24 @@ public class ClawMachineScreen extends AbstractContainerScreen<ClawMachineMenu> 
     protected void init() {
         super.init();
 
-        leftButton = new HoldingButton(leftPos,topPos+120,18,18,Component.literal("L"));
+        int xS = 30;
+        int yS = 100;
+
+        leftButton = new HoldingButton(leftPos+xS,topPos+yS+20,18,18,Component.literal("L"));
         addRenderableWidget(leftButton);
 
-        rightButton = new HoldingButton(leftPos+40,topPos+120,18,18,Component.literal("R"));
+        rightButton = new HoldingButton(leftPos+40+xS,topPos+yS+20,18,18,Component.literal("R"));
         addRenderableWidget(rightButton);
 
-        forwardButton = new HoldingButton(leftPos+20,topPos+100,18,18,Component.literal("F"));
+        forwardButton = new HoldingButton(leftPos+20+xS,topPos+yS,18,18,Component.literal("F"));
         addRenderableWidget(forwardButton);
 
-        backButton = new HoldingButton(leftPos+20,topPos+140,18,18,Component.literal("B"));
+        backButton = new HoldingButton(leftPos+20+xS,topPos+40+yS,18,18,Component.literal("B"));
 
         addRenderableWidget(backButton);
 
         addRenderableWidget(new Button.Builder(Component.literal("GRAB"),button -> sendButtonToServer(9))
-                .bounds(leftPos+80,topPos+120,18,18).build());
+                .bounds(leftPos+80+xS,topPos+20+yS,36,18).build());
     }
 
     private void sendButtonToServer(int action) {
@@ -74,6 +83,13 @@ public class ClawMachineScreen extends AbstractContainerScreen<ClawMachineMenu> 
         boolean right = rightButton.isDown() || InputConstants.isKeyDown(minecraft.getWindow().getWindow(), GLFW.GLFW_KEY_RIGHT);
         boolean forward = forwardButton.isDown() || InputConstants.isKeyDown(minecraft.getWindow().getWindow(), GLFW.GLFW_KEY_UP);
         boolean back = backButton.isDown() || InputConstants.isKeyDown(minecraft.getWindow().getWindow(), GLFW.GLFW_KEY_DOWN);
+
+        boolean grab = InputConstants.isKeyDown(minecraft.getWindow().getWindow(), GLFW.GLFW_KEY_KP_0);
+
+        if (grab) {
+            sendButtonToServer(9);
+            return;
+        }
 
         if (left && right) {
             left = right = false;

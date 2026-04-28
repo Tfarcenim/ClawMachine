@@ -1,7 +1,13 @@
 package tfar.clawmachine.platform.services;
 
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import tfar.clawmachine.network.client.S2CModPacket;
+import tfar.clawmachine.network.server.C2SModPacket;
 
 public interface IPlatformHelper {
 
@@ -38,4 +44,10 @@ public interface IPlatformHelper {
     }
 
     BakedModel getModel(ResourceLocation model);
+
+    <MSG extends S2CModPacket> void registerClientPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec);
+    <MSG extends C2SModPacket> void registerServerPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec);
+
+    void sendToClient(S2CModPacket msg, ServerPlayer player);
+    void sendToServer(C2SModPacket msg);
 }

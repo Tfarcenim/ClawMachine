@@ -42,7 +42,7 @@ public class StaticItemEntityRenderer extends EntityRenderer<StaticItemEntity> {
         float f1 = 0;
         float f2 = bakedmodel.getTransforms().getTransform(ItemDisplayContext.GROUND).scale.y();
         poseStack.translate(0.0F, f1 + 0.25F * f2*0-1/16d, 0.0F);
-        float f3 = 0;//entity.getSpin(partialTicks);
+        float f3 = entity.getYRot();
         poseStack.mulPose(Axis.YP.rotation(f3));
         ItemEntityRenderer.renderMultipleFromCount(this.itemRenderer, poseStack, buffer, packedLight, itemstack, bakedmodel, flag, this.random);
         poseStack.popPose();

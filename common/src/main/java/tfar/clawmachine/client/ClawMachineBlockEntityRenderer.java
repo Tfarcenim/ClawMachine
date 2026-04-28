@@ -124,7 +124,7 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
             float f = 0.25F;
             float f1 = 0;
             float f2 = bakedmodel.getTransforms().getTransform(ItemDisplayContext.GROUND).scale.y();
-            poseStack.translate(0.0F, f1 + 0.25F * f2 * 0, 0.0F);
+            poseStack.translate(0.0F, -1/8d, 0.0F);
             poseStack.translate(d0+.5,d1,d2+.5);
             float f3 = 0;//entity.getSpin(partialTicks);
             poseStack.mulPose(Axis.YP.rotation(f3));

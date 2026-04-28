@@ -84,7 +84,7 @@ public class StaticItemEntity extends Entity {
                     f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
                 }
 
-                this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
+                this.setDeltaMovement(this.getDeltaMovement().multiply(f, 0.98, f));
                 if (this.onGround()) {
                     Vec3 vec31 = this.getDeltaMovement();
                     if (vec31.y < 0.0) {
@@ -184,5 +184,9 @@ public class StaticItemEntity extends Entity {
         if (!this.getItem().isEmpty()) {
             compound.put("Item", this.getItem().save(this.registryAccess()));
         }
+    }
+
+    public void randomRotations() {
+        setYRot(random.nextFloat() * 360);
     }
 }

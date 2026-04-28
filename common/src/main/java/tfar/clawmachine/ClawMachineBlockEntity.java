@@ -1,18 +1,24 @@
 package tfar.clawmachine;
 
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -23,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider {
 
@@ -35,6 +42,86 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     public boolean clawClosed;
     public ItemStack grabbedItem = ItemStack.EMPTY;
+
+    public int credits;
+    public double winChance = 1;
+
+    UUID activePlayer = Util.NIL_UUID;
+
+    private final ContainerData containerData = new ContainerData() {
+        @Override
+        public int get(int index) {
+            return switch (index){
+                default -> 0;
+                case 0 -> credits;
+                case 1 -> (int) winChance * 100;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+            switch (index){
+                case 0 -> credits = index;
+                case 1 -> winChance = index/100d;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    };
+
+    private final SimpleContainer paymentContainer = new SimpleContainer(2){
+        @Override
+        public void fromTag(ListTag tag, HolderLookup.Provider levelRegistry) {
+            for (int i = 0; i < this.getContainerSize(); i++) {
+                this.setItem(i, ItemStack.EMPTY);
+            }
+
+            for (int k = 0; k < tag.size(); k++) {
+                CompoundTag compoundtag = tag.getCompound(k);
+                int j = compoundtag.getByte("Slot") & 255;
+                if (j < this.getContainerSize()) {
+                    this.setItem(j, ItemStack.parse(levelRegistry, compoundtag).orElse(ItemStack.EMPTY));
+                }
+            }
+        }
+
+        @Override
+        public ListTag createTag(HolderLookup.Provider levelRegistry) {
+            ListTag listtag = new ListTag();
+
+            for (int i = 0; i < this.getContainerSize(); i++) {
+                ItemStack itemstack = this.getItem(i);
+                if (!itemstack.isEmpty()) {
+                    CompoundTag compoundtag = new CompoundTag();
+                    compoundtag.putByte("Slot", (byte)i);
+                    listtag.add(itemstack.save(levelRegistry, compoundtag));
+                }
+            }
+
+            return listtag;
+        }
+
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            ClawMachineBlockEntity.this.setChanged();
+        }
+    };
+
+    public boolean isOccupied() {
+        return !Util.NIL_UUID.equals(activePlayer);
+    }
+
+    public ItemStack getRequiredPayment() {
+        return paymentContainer.getItem(0);
+    }
+
+    public boolean isAllowedToPlay(Player player) {
+        return player.getAbilities().instabuild || getRequiredPayment().isEmpty() || credits > 0;
+    }
 
     boolean moveToStart;
 
@@ -49,7 +136,10 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     Vec3 getDefaultClawPos(Direction facing) {
         return switch (facing) {
-            default -> new Vec3(0,.5,0);
+            default -> new Vec3(clawBounds.maxX,clawBounds.maxY,clawBounds.minZ);
+            case EAST ->  new Vec3(clawBounds.maxX,clawBounds.maxY,clawBounds.maxZ);
+            case SOUTH ->  new Vec3(clawBounds.minX,clawBounds.maxY,clawBounds.maxZ);
+            case WEST ->  new Vec3(clawBounds.minX,clawBounds.maxY,clawBounds.minZ);
         };
     }
 
@@ -63,6 +153,9 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         tag.put("claw_pos",t);
         tag.putBoolean("claw_closed", clawClosed);
         tag.put("grabbed_item",grabbedItem.saveOptional(registries));
+        tag.put("payment",paymentContainer.createTag(registries));
+        tag.putInt("credits",credits);
+        tag.putDouble("win_chance",winChance);
     }
 
     @Override
@@ -73,7 +166,9 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         clawPos = new Vec3(t.getDouble("x"),t.getDouble("y"),t.getDouble("z"));
         prevClawPos = clawPos;
         grabbedItem = ItemStack.parseOptional(registries,tag.getCompound("grabbed_item"));
-
+        paymentContainer.fromTag(tag.getList("payment", Tag.TAG_COMPOUND),registries);
+        credits = tag.getInt("credits");
+        winChance = tag.getDouble("win_chance");
     }
 
     @Nullable
@@ -90,7 +185,17 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     @Override
     public void setChanged() {
         super.setChanged();
-        level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(), ClawMachineBlock.UPDATE_ALL);
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), ClawMachineBlock.UPDATE_ALL);
+        }
+    }
+
+    public void setActivePlayer(UUID activePlayer) {
+        this.activePlayer = activePlayer;
+    }
+
+    public void clearActivePlayer() {
+        setActivePlayer(Util.NIL_UUID);
     }
 
     @Override
@@ -101,12 +206,21 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return new ClawMachineMenu(containerId,playerInventory, ContainerLevelAccess.create(level,worldPosition));
+        if (isOccupied()) return null;
+        return new ClawMachineMenu(containerId,playerInventory, ContainerLevelAccess.create(level,worldPosition),containerData);
     }
 
     @Nullable
     public AbstractContainerMenu createLoaderMenu(int containerId, Inventory playerInventory, Player player) {
-        return new ClawMachineLoaderMenu(containerId,playerInventory, ContainerLevelAccess.create(level,worldPosition));
+        return new ClawMachineLoaderMenu(containerId,playerInventory, ContainerLevelAccess.create(level,worldPosition),paymentContainer,containerData);
+    }
+
+    void addCredit(ItemStack stack) {
+        credits++;
+        int existing = paymentContainer.getItem(1).getCount();
+        paymentContainer.setItem(1,stack.copyWithCount(existing+1));
+        stack.shrink(1);
+        setChanged();
     }
 
     //red
@@ -115,7 +229,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     //1 to 0
     public AABB getClawHitbox() {
         double w = 3/16d;
-        double o = .5 - w/2;
+        double o =  (1 - w)/2;
         return new AABB(clawPos.add(o,1/8d,o),clawPos.add(w+o,.25,w+o)).move(worldPosition);
     }
 
@@ -127,25 +241,18 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
                 if (grabbedItem.isEmpty()) {
                     //check for overlapping hitboxes
                     ItemStack stack = tryGrab();
-                    if (stack.isEmpty()) {
-                        if (clawPos.y <=clawYMin) {
-                            clawVelocity = new Vec3(0,clawSpeed,0);
-                        } else if (clawPos.y >= .5) {
-                            clawPos = new Vec3(clawPos.x, .5, clawPos.z);
-                            moveToStart = false;
-                            clawVelocity = Vec3.ZERO;
-                        }
-                    } else {
+                    if (!stack.isEmpty()) {
                         grabbedItem = stack;
-                        clawClosed = true;
-                        clawVelocity = new Vec3(0,clawSpeed,0);
                     }
-                } else {
-                    if (clawPos.y >= .5) {
-                        clawPos = new Vec3(clawPos.x, .5, clawPos.z);
-                        moveToStart = false;
-                        clawVelocity = Vec3.ZERO;
-                    }
+                }
+
+                if (clawPos.y <=clawYMin) {
+                    clawVelocity = new Vec3(0,clawSpeed,0);
+                    clawClosed = true;
+                } else if (clawPos.y == clawYMax) {
+                    Vec3 distance = defaultClawPos.subtract(clawPos);
+                    Vec3 velocity = distance.normalize().scale(clawSpeed);
+                    clawVelocity = velocity;
                 }
             }
             setChanged();
@@ -176,8 +283,21 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         clawPos = clawPos.add(clawVelocity);
         if (!getClawBounds().contains(clawPos)) {
             putInBounds();
+            if (moveToStart && clawPos.equals(defaultClawPos)) {
+                dropItem();
+            }
         }
         return moved;
+    }
+
+    void dropItem() {
+        clawClosed = false;
+        moveToStart = false;
+        clawVelocity = Vec3.ZERO;
+        Vec3 absPos = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
+        StaticItemEntity staticItemEntity = new StaticItemEntity(level,absPos.x+.5,absPos.y,absPos.z+.5,grabbedItem.copy());
+        level.addFreshEntity(staticItemEntity);
+        grabbedItem = ItemStack.EMPTY;
     }
 
     static final double clawYMin = -3/16d;

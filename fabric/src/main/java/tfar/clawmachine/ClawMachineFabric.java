@@ -1,6 +1,7 @@
 package tfar.clawmachine;
 
 import net.fabricmc.api.ModInitializer;
+import tfar.clawmachine.network.PacketHandler;
 
 public class ClawMachineFabric implements ModInitializer {
     
@@ -14,5 +15,6 @@ public class ClawMachineFabric implements ModInitializer {
         // Use Fabric to bootstrap the Common mod.
         ClawMachine.init();
         ClawMachine.register();
+        PacketHandler.registerPackets();
     }
 }

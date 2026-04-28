@@ -88,6 +88,13 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
     @Override
     public void onRemove(BlockState pState, Level pLevel, BlockPos pos, BlockState pNewState, boolean pIsMoving) {
         if (!pState.is(pNewState.getBlock())) {
+
+            BlockEntity blockEntity = pLevel.getBlockEntity(pos);
+
+            if (blockEntity instanceof ClawMachineBlockEntity clawMachineBlockEntity) {
+                Containers.dropContentsOnDestroy(pState, pNewState,pLevel, pos);
+            }
+
             Direction direction = pState.getValue(FACING);
             Corner corner = pState.getValue(CORNER);
             TripleBlockThird third = pState.getValue(THIRD);
@@ -146,20 +153,32 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (!level.isClientSide()) {
-            ClawMachineBlockEntity clawMachineBlockEntity = locate(level, pos, state);
-            if (clawMachineBlockEntity != null) {
-                player.openMenu(clawMachineBlockEntity);
+        ClawMachineBlockEntity clawMachineBlockEntity = locate(level, pos, state);
+        if (clawMachineBlockEntity != null) {
+            if (clawMachineBlockEntity.isAllowedToPlay(player)) {
+                if (!level.isClientSide()) {
+                    player.openMenu(clawMachineBlockEntity);
+                }
+                return InteractionResult.SUCCESS_NO_ITEM_USED;
+            } else {
+                player.displayClientMessage(Component.literal("Insufficient credits"),true);
+                return InteractionResult.FAIL;
             }
         }
-        return InteractionResult.SUCCESS_NO_ITEM_USED;
+        return InteractionResult.PASS;
     }
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (stack.is(ModItems.KEY)){
-            ClawMachineBlockEntity clawMachineBlockEntity = locate(level, pos, state);
-            if (clawMachineBlockEntity != null) {
+        ClawMachineBlockEntity clawMachineBlockEntity = locate(level, pos, state);
+
+        if (clawMachineBlockEntity != null) {
+
+            ItemStack payment = clawMachineBlockEntity.getRequiredPayment();
+
+            if (stack.is(ModItems.KEY)) {
+
+
                 player.openMenu(new MenuProvider() {
                     @Override
                     public Component getDisplayName() {
@@ -172,6 +191,10 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
                         return clawMachineBlockEntity.createLoaderMenu(containerId, playerInventory, player);
                     }
                 });
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            } else if (!payment.isEmpty() && ItemStack.isSameItemSameComponents(payment,stack)) {
+                //add one credit
+                clawMachineBlockEntity.addCredit(stack);
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
         }

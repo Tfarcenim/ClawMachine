@@ -7,9 +7,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,10 +18,15 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
 
     final ClawMachineBlockEntity clawMachineBlockEntity;
+    private final ContainerData containerData;
 
-    final SimpleContainer container;
+    final SimpleContainer inputContainer;
 
-    public ClawMachineLoaderMenu(int containerId, Inventory inventory, ContainerLevelAccess access) {
+    public ClawMachineLoaderMenu(int menuType, Inventory containerId) {
+        this(menuType, containerId,ContainerLevelAccess.NULL,new SimpleContainer(2),new SimpleContainerData(2));
+    }
+
+    public ClawMachineLoaderMenu(int containerId, Inventory inventory, ContainerLevelAccess access, SimpleContainer paymentContainer, ContainerData containerData) {
         super(ModMenuTypes.CLAW_MACHINE_LOADER, containerId);
         this.access = access;
 
@@ -31,16 +34,20 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
             BlockEntity blockEntity =  level.getBlockEntity(pos);
             return blockEntity instanceof ClawMachineBlockEntity ? (ClawMachineBlockEntity) blockEntity : null;
         }).orElse(null);
+        this.containerData = containerData;
 
-        container = new SimpleContainer(2){
+        inputContainer = new SimpleContainer(1){
             @Override
             public void setChanged() {
                 super.setChanged();
                 slotsChanged(this);
             }
         };
-        addSlot(new Slot(container,0,26,45));
-        addSlot(new Slot(container,1,134,47));
+        addSlot(new Slot(inputContainer,0,26,36));
+
+
+        addSlot(new Slot(paymentContainer,0,26 + 3 * 18,36));
+        addSlot(new Slot(paymentContainer,1,26 + 5 * 18,36));
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
@@ -51,6 +58,12 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
         for (int k = 0; k < 9; k++) {
             this.addSlot(new Slot(inventory, k, 8 + k * 18, 142));
         }
+        addDataSlots(containerData);
+    }
+
+
+    public double getWinChance() {
+        return containerData.get(1) / 100d;
     }
 
     @Override
@@ -68,7 +81,7 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
     @Override
     public void slotsChanged(Container container) {
         super.slotsChanged(container);
-        if (container == this.container && clawMachineBlockEntity != null) {
+        if (container == this.inputContainer && clawMachineBlockEntity != null) {
             ItemStack input = container.getItem(0);
             if (!input.isEmpty()) {
                 spawnPrize(input);
@@ -81,8 +94,9 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
         Direction facing = state.getValue(ClawMachineBlock.FACING);
         Vec3 pos = pickPos(facing,clawMachineBlockEntity.getBlockPos(),clawMachineBlockEntity.getLevel().random);
         StaticItemEntity itemEntity = new StaticItemEntity(clawMachineBlockEntity.getLevel(),pos.x,pos.y,pos.z,stack.copyWithCount(1));
+        itemEntity.randomRotations();
         clawMachineBlockEntity.getLevel().addFreshEntity(itemEntity);
-        container.removeItem(0,1);
+        inputContainer.removeItem(0,1);
     }
 
     //inner bounds = 1 3/4s x 1 5/8s
@@ -110,7 +124,7 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
 
     static Vec3 pickRandomPointIn(AABB aabb, RandomSource random) {
 
-        boolean boundsTesting = true;
+        boolean boundsTesting = false;
 
 
 
@@ -132,9 +146,6 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
         return new Vec3(xRand+.5,aabb.maxY-1/4d,zRand+.5);
     }
 
-    public ClawMachineLoaderMenu(int menuType, Inventory containerId) {
-        this(menuType, containerId,ContainerLevelAccess.NULL);
-    }
 
     @Override
     public ItemStack quickMoveStack(Player player, int i) {
