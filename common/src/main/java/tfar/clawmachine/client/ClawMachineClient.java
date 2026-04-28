@@ -14,6 +14,8 @@ public class ClawMachineClient {
     public static final ResourceLocation CABLE = ClawMachine.id("block/clawcable");
     public static final ResourceLocation CLOSED = ClawMachine.id("block/clawclosed");
     public static final ResourceLocation OPEN = ClawMachine.id("block/clawopened");
+    public static final ResourceLocation CLOSED_90 = ClawMachine.id("block/clawclosed90");
+    public static final ResourceLocation OPEN_90 = ClawMachine.id("block/clawopened90");
     public static final ResourceLocation TOP = ClawMachine.id("block/clawtop");
 
     public static void renderer(){

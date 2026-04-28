@@ -17,6 +17,8 @@ public class ClawMachineFabricClient implements ClientModInitializer {
                 pluginContext.addModels(ClawMachineClient.CABLE);
                 pluginContext.addModels(ClawMachineClient.CLOSED);
                 pluginContext.addModels(ClawMachineClient.OPEN);
+                pluginContext.addModels(ClawMachineClient.CLOSED_90);
+                pluginContext.addModels(ClawMachineClient.OPEN_90);
                 pluginContext.addModels(ClawMachineClient.TOP);
             }
         });

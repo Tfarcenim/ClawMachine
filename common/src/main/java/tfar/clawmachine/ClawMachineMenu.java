@@ -37,6 +37,14 @@ public class ClawMachineMenu extends AbstractContainerMenu {
         return containerData.get(0);
     }
 
+    public int getTimer() {
+        return containerData.get(2);
+    }
+
+    public int getProgress() {
+        return containerData.get(3);
+    }
+
 
 
     @Override

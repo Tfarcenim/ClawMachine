@@ -14,6 +14,8 @@ import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -23,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import tfar.clawmachine.ClawMachineBlock;
 import tfar.clawmachine.ClawMachineBlockEntity;
 import tfar.clawmachine.ModBlocks;
 import tfar.clawmachine.platform.Services;
@@ -75,11 +78,16 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
         poseStack.pushPose();
         poseStack.translate(0,d1,0);
 
+        Direction.Axis axis = clawMachineBlockEntity.getBlockState().getValue(ClawMachineBlock.FACING).getAxis();
+
+        ResourceLocation model = clawMachineBlockEntity.clawClosed ? (axis == Direction.Axis.X? ClawMachineClient.CLOSED_90 : ClawMachineClient.CLOSED)
+                : (axis == Direction.Axis.X? ClawMachineClient.OPEN_90 : ClawMachineClient.OPEN);
+
         this.blockRenderDispatcher
                 .getModelRenderer()
                 .tesselateBlock(
                         level,
-                        clawMachineBlockEntity.clawClosed ? Services.PLATFORM.getModel(ClawMachineClient.CLOSED): Services.PLATFORM.getModel(ClawMachineClient.OPEN),
+                        Services.PLATFORM.getModel(model),
                         dummy,
                         pos,
                         poseStack,
@@ -93,8 +101,10 @@ public class ClawMachineBlockEntityRenderer implements BlockEntityRenderer<ClawM
 
         double c = 1 + 1/16d;
         //simulate cable stretching
-        float scale = (float) (1 - d1/c);
-        poseStack.scale(1,scale ,1);//1 at 0 and 0 at 1 1/16
+        double y0 = 1/2d;
+        float scale = (float) (1 - d1);
+        poseStack.translate(0,13/32d,0);
+        poseStack.scale(1,scale ,1);//1 at 0 and 0 at 1/2
         this.blockRenderDispatcher
                     .getModelRenderer()
                     .tesselateBlock(

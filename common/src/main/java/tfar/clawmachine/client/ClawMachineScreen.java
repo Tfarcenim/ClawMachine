@@ -39,6 +39,10 @@ public class ClawMachineScreen extends AbstractContainerScreen<ClawMachineMenu> 
     @Override
     protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         guiGraphics.drawString(font,"Credits: "+menu.getCredits(),100,106,0x007f00,false);
+
+        int remaining = menu.getTimer()-menu.getProgress();
+
+        guiGraphics.drawString(font,"Timer: "+remaining/20,100,106+36,0x7f0000,false);
     }
 
     @Override

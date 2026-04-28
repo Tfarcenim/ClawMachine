@@ -50,7 +50,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     int timeSincePickup;
 
     public int timer=1200;
-    public int progress = timer;
+    public int progress;
 
     UUID activePlayer = Util.NIL_UUID;
 
@@ -168,6 +168,8 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         tag.put("payment",paymentContainer.createTag(registries));
         tag.putInt("credits",credits);
         tag.putDouble("win_chance",winChance);
+        tag.putInt("timer",timer);
+        tag.putInt("progress",progress);
     }
 
     @Override
@@ -181,6 +183,8 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         paymentContainer.fromTag(tag.getList("payment", Tag.TAG_COMPOUND),registries);
         credits = tag.getInt("credits");
         winChance = tag.getDouble("win_chance");
+        timer = tag.getInt("timer");
+        progress = tag.getInt("progress");
     }
 
     @Nullable
@@ -247,6 +251,12 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     void serverTick() {
         boolean moved = updateClawPos();
+        if (isOccupied()) {
+            progress++;
+            if (progress>=timer) {
+                handleInput(9);
+            }
+        }
         if (moved) {
             prevClawPos = clawPos;
             if (moveToStart) {
@@ -313,6 +323,10 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         clawClosed = false;
         moveToStart = false;
         clawVelocity = Vec3.ZERO;
+        if (credits>0) {
+            credits--;
+        }
+        progress = 0;
         Vec3 absPos = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
         StaticItemEntity staticItemEntity = new StaticItemEntity(level,absPos.x+.5,absPos.y,absPos.z+.5,grabbedItem.copy());
         level.addFreshEntity(staticItemEntity);
