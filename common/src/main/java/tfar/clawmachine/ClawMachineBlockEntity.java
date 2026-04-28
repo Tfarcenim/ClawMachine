@@ -4,7 +4,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -46,7 +45,16 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     public int credits;
     public double winChance = 1;
 
+    boolean shouldFail;
+    int fallAfter;
+    int timeSincePickup;
+
+    public int timer=1200;
+    public int progress = timer;
+
     UUID activePlayer = Util.NIL_UUID;
+
+    public static final int DATA_SLOTS = 4;
 
     private final ContainerData containerData = new ContainerData() {
         @Override
@@ -54,21 +62,25 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
             return switch (index){
                 default -> 0;
                 case 0 -> credits;
-                case 1 -> (int) winChance * 100;
+                case 1 -> (int) (winChance * 100);
+                case 2 -> timer;
+                case 3 -> progress;
             };
         }
 
         @Override
         public void set(int index, int value) {
             switch (index){
-                case 0 -> credits = index;
-                case 1 -> winChance = index/100d;
+                case 0 -> credits = value;
+                case 1 -> winChance = value/100d;
+                case 2-> timer = value;
+                case 3 -> progress = value;
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return DATA_SLOTS;
         }
     };
 
@@ -238,6 +250,10 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         if (moved) {
             prevClawPos = clawPos;
             if (moveToStart) {
+                timeSincePickup++;
+                if (shouldFail && timeSincePickup == fallAfter) {
+                    dropFailed();
+                }
                 if (grabbedItem.isEmpty()) {
                     //check for overlapping hitboxes
                     ItemStack stack = tryGrab();
@@ -267,6 +283,9 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     ItemStack tryGrab() {
+        if (shouldFail && timeSincePickup >= fallAfter) {
+            return ItemStack.EMPTY;
+        }
         AABB clawHitbox = getClawHitbox();
         List<StaticItemEntity> staticItemEntities = level.getEntitiesOfClass(StaticItemEntity.class,clawHitbox);
         if (!staticItemEntities.isEmpty()) {
@@ -294,6 +313,16 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         clawClosed = false;
         moveToStart = false;
         clawVelocity = Vec3.ZERO;
+        Vec3 absPos = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
+        StaticItemEntity staticItemEntity = new StaticItemEntity(level,absPos.x+.5,absPos.y,absPos.z+.5,grabbedItem.copy());
+        level.addFreshEntity(staticItemEntity);
+        grabbedItem = ItemStack.EMPTY;
+    }
+
+    void dropFailed() {
+        //clawClosed = false;
+        //moveToStart = false;
+        //clawVelocity = Vec3.ZERO;
         Vec3 absPos = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
         StaticItemEntity staticItemEntity = new StaticItemEntity(level,absPos.x+.5,absPos.y,absPos.z+.5,grabbedItem.copy());
         level.addFreshEntity(staticItemEntity);
@@ -426,6 +455,11 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
                 if (grabbedItem.isEmpty()) {//don't process if already grabbing
                     moveToStart = true;
                     clawVelocity = new Vec3(0,-clawSpeed/2,0);
+                    shouldFail = level.random.nextDouble()> winChance;
+                    if (shouldFail) {
+                        fallAfter = 50+level.random.nextInt(15);
+                    }
+                    timeSincePickup = 0;
                 } else {
                     Vec3 spawn = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
                     StaticItemEntity staticItemEntity = new StaticItemEntity(level,spawn.x+.5,spawn.y,spawn.z+.5,grabbedItem.copy());

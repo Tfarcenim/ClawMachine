@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class ClawMachineLoaderMenu extends AbstractContainerMenu {
+public class ClawMachineLoaderMenu extends AbstractContainerMenu{
     private final ContainerLevelAccess access;
 
     final ClawMachineBlockEntity clawMachineBlockEntity;
@@ -23,7 +23,7 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
     final SimpleContainer inputContainer;
 
     public ClawMachineLoaderMenu(int menuType, Inventory containerId) {
-        this(menuType, containerId,ContainerLevelAccess.NULL,new SimpleContainer(2),new SimpleContainerData(2));
+        this(menuType, containerId,ContainerLevelAccess.NULL,new SimpleContainer(2),new SimpleContainerData(ClawMachineBlockEntity.DATA_SLOTS));
     }
 
     public ClawMachineLoaderMenu(int containerId, Inventory inventory, ContainerLevelAccess access, SimpleContainer paymentContainer, ContainerData containerData) {
@@ -43,20 +43,24 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
                 slotsChanged(this);
             }
         };
-        addSlot(new Slot(inputContainer,0,26,36));
+
+        int y0 = 55;
+        addSlot(new Slot(inputContainer,0,26,y0));
 
 
-        addSlot(new Slot(paymentContainer,0,26 + 3 * 18,36));
-        addSlot(new Slot(paymentContainer,1,26 + 5 * 18,36));
+        addSlot(new Slot(paymentContainer,0,26 + 3 * 18,y0));
+        addSlot(new Slot(paymentContainer,1,26 + 5 * 18,y0));
+
+        int yS = 84+19;
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
-                this.addSlot(new Slot(inventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlot(new Slot(inventory, j + i * 9 + 9, 8 + j * 18, yS + i * 18));
             }
         }
 
         for (int k = 0; k < 9; k++) {
-            this.addSlot(new Slot(inventory, k, 8 + k * 18, 142));
+            this.addSlot(new Slot(inventory, k, 8 + k * 18, 58+yS));
         }
         addDataSlots(containerData);
     }
@@ -64,6 +68,12 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
 
     public double getWinChance() {
         return containerData.get(1) / 100d;
+    }
+
+    @Override
+    public void setData(int id, int data) {
+        super.setData(id, data);
+        this.broadcastChanges();
     }
 
     @Override
@@ -101,7 +111,6 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
 
     //inner bounds = 1 3/4s x 1 5/8s
     Vec3 pickPos(Direction facing, BlockPos controlPos, RandomSource random) {
-        float width = ModEntityTypes.STATIC_ITEM_ENTITY.getDimensions().width();
 
         AABB clawBounds = clawMachineBlockEntity.clawBounds.move(controlPos);
 
@@ -156,5 +165,15 @@ public class ClawMachineLoaderMenu extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player player) {
         return ClawMachineMenu.stillValid(access,player);
+    }
+
+    public void setWinChance(int v) {
+        clawMachineBlockEntity.winChance = v/100d;
+        clawMachineBlockEntity.setChanged();
+    }
+
+    public void setTimer(int ticks) {
+        clawMachineBlockEntity.timer = ticks;
+        clawMachineBlockEntity.setChanged();
     }
 }

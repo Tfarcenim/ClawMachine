@@ -6,6 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import tfar.clawmachine.ClawMachineLoaderMenu;
 import tfar.clawmachine.network.PacketHandler;
 import tfar.clawmachine.platform.Services;
 
@@ -38,7 +39,9 @@ public class C2SAdjustWinChancePacket implements C2SModPacket {
     }
 
     public void handleServer(ServerPlayer player) {
-
+        if (player.containerMenu instanceof ClawMachineLoaderMenu clawMachineLoaderMenu){
+            clawMachineLoaderMenu.setWinChance(percentage);
+        }
     }
 
     @Override

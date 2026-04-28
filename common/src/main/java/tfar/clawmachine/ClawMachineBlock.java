@@ -74,8 +74,8 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
         for (int y = 0; y < 3; y++) {
             BlockPos pos0 = pos.above(y);
             BlockPos pos1 = pos.relative(facing).above(y);
-            BlockPos pos2 = pos.relative(facing.getCounterClockWise()).above(y);
-            BlockPos pos3 = pos.relative(facing.getCounterClockWise()).relative(facing).above(y);
+            BlockPos pos2 = pos.relative(facing.getClockWise()).above(y);
+            BlockPos pos3 = pos.relative(facing.getClockWise()).relative(facing).above(y);
             if (level.getBlockState(pos0).canBeReplaced(context) && level.getBlockState(pos1).canBeReplaced(context) &&
                     level.getBlockState(pos2).canBeReplaced(context) && level.getBlockState(pos3).canBeReplaced(context)) {
                 continue;

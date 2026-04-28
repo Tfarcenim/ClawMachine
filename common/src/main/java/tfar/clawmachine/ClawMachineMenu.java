@@ -14,6 +14,9 @@ public class ClawMachineMenu extends AbstractContainerMenu {
     private final ClawMachineBlockEntity clawMachineBlockEntity;
     private final ContainerData containerData;
 
+    public ClawMachineMenu(int menuType, Inventory containerId) {
+        this(menuType, containerId, ContainerLevelAccess.NULL, new SimpleContainerData(ClawMachineBlockEntity.DATA_SLOTS));
+    }
     public ClawMachineMenu(int containerId, Inventory inventory, ContainerLevelAccess access, ContainerData containerData) {
         super(ModMenuTypes.CLAW_MACHINE, containerId);
         this.access = access;
@@ -34,9 +37,7 @@ public class ClawMachineMenu extends AbstractContainerMenu {
         return containerData.get(0);
     }
 
-    public ClawMachineMenu(int menuType, Inventory containerId) {
-        this(menuType, containerId, ContainerLevelAccess.NULL, new SimpleContainerData(2));
-    }
+
 
     @Override
     public ItemStack quickMoveStack(Player player, int i) {
