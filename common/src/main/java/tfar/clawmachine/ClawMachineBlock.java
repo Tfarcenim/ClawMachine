@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -195,6 +197,7 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
             } else if (!payment.isEmpty() && ItemStack.isSameItemSameComponents(payment,stack)) {
                 //add one credit
                 clawMachineBlockEntity.addCredit(stack);
+                level.playSound(null,pos, SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.BLOCKS);
                 return ItemInteractionResult.sidedSuccess(level.isClientSide);
             }
         }

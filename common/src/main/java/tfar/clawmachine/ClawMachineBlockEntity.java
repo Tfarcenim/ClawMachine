@@ -11,6 +11,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -278,6 +280,8 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
                     ItemStack stack = tryGrab();
                     if (!stack.isEmpty()) {
                         grabbedItem = stack;
+                        level.playSound(null,worldPosition, SoundEvents.TRIAL_SPAWNER_CLOSE_SHUTTER, SoundSource.BLOCKS, 1.0F, 1.0F);
+
                     }
                 }
 
@@ -298,6 +302,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
             ItemEntity itemEntity = new ItemEntity(level,pos.x,pos.y-.5,pos.z,staticItemEntity.getItem().copy());
             level.addFreshEntity(itemEntity);
             staticItemEntity.discard();
+            level.playSound(null,worldPosition, SoundEvents.TRIAL_SPAWNER_OPEN_SHUTTER, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
     }
 
@@ -319,15 +324,28 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     boolean updateClawPos() {
         boolean moved = !Vec3.ZERO.equals(clawVelocity);
         clawPos = clawPos.add(clawVelocity);
-        if (!getClawBounds().contains(clawPos)) {
+        if (!clawBounds.contains(clawPos)) {
             putInBounds();
             if (moveToStart && clawPos.equals(defaultClawPos)) {
                 dropItem();
             }
         }
+
         if (progress+200 > timer) {
             dropItem();
         }
+
+        if (clawVelocity.y<0 && progress%4 ==0){
+            level.playSound(null,worldPosition, SoundEvents.FISHING_BOBBER_THROW, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+       else if (clawVelocity.y>0 && progress%4 ==0){
+            level.playSound(null,worldPosition, SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+
+        else if (moved && progress%2 == 0) {
+            level.playSound(null,worldPosition, SoundEvents.CHAIN_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+
         return moved;
     }
 
@@ -352,6 +370,8 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         Vec3 absPos = clawPos.add(worldPosition.getX(),worldPosition.getY(),worldPosition.getZ());
         StaticItemEntity staticItemEntity = new StaticItemEntity(level,absPos.x+.5,absPos.y,absPos.z+.5,grabbedItem.copy());
         level.addFreshEntity(staticItemEntity);
+        level.playSound(null,worldPosition, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
+
         grabbedItem = ItemStack.EMPTY;
     }
 
@@ -394,7 +414,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     void putInBounds() {
-        AABB bounds = getClawBounds();
+        AABB bounds = clawBounds;
         double x = Math.clamp(clawPos.x,bounds.minX,bounds.maxX);
         double y = Math.clamp(clawPos.y,bounds.minY,bounds.maxY);
         double z = Math.clamp(clawPos.z,bounds.minZ,bounds.maxZ);
@@ -410,6 +430,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     public void handleInput(int id) {
         Direction facing = getBlockState().getValue(ClawMachineBlock.FACING);
         if (moveToStart) {return;}
+
         switch (id) {
             default -> clawVelocity = Vec3.ZERO;
             case 0 -> clawVelocity = Vec3.ZERO;
@@ -499,7 +520,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     public void eject(Player player) {
-        List<StaticItemEntity> staticItemEntity = level.getEntitiesOfClass(StaticItemEntity.class,getClawBounds().inflate(1,1,1).move(worldPosition));
+        List<StaticItemEntity> staticItemEntity = level.getEntitiesOfClass(StaticItemEntity.class,clawBounds.inflate(1,1,1).move(worldPosition));
         staticItemEntity.forEach(staticItemEntity1 -> {
             staticItemEntity1.setPos(player.position());
         });
