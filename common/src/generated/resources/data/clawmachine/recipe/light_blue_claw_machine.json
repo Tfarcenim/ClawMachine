@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "a": {
+      "item": "minecraft:light_blue_terracotta"
+    },
+    "b": {
+      "item": "minecraft:glass_pane"
+    },
+    "c": {
+      "item": "minecraft:chain"
+    },
+    "d": {
+      "item": "minecraft:hopper"
+    },
+    "e": {
+      "item": "minecraft:lever"
+    },
+    "f": {
+      "item": "minecraft:stone_button"
+    }
+  },
+  "pattern": [
+    "aaa",
+    "bcb",
+    "def"
+  ],
+  "result": {
+    "count": 1,
+    "id": "clawmachine:light_blue_claw_machine"
+  }
+}

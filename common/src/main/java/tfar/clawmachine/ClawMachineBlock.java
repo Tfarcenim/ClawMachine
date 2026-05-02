@@ -176,7 +176,7 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
 
             ItemStack payment = clawMachineBlockEntity.getRequiredPayment();
 
-            if (stack.is(ModItems.KEY)) {
+            if (stack.is(ModItems.KEY) && player.getUUID().equals(clawMachineBlockEntity.owner)) {
 
 
                 player.openMenu(new MenuProvider() {
@@ -261,7 +261,7 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         Direction facing = state.getValue(FACING);
         //place other blocks
-        placeLayer(level, pos, state, facing);
+        placeLayer(level, pos, state,placer, facing);
     }
 
     //a-b
@@ -338,7 +338,7 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
         };
     }
 
-    void placeLayer(Level level, BlockPos pos, BlockState state, Direction facing) {
+    void placeLayer(Level level, BlockPos pos, BlockState state, LivingEntity placer, Direction facing) {
 
         for (TripleBlockThird third : TripleBlockThird.values()) {
 
@@ -360,6 +360,12 @@ public class ClawMachineBlock extends HorizontalDirectionalBlock implements Enti
                 BlockPos blockPos = pos.above(y);
                 level.setBlock(blockPos, DoublePlantBlock.copyWaterloggedFrom(level, blockPos, this.defaultBlockState().setValue(THIRD, third)
                         .setValue(FACING, facing).setValue(CORNER, Corner.FRONT_LEFT)), 3);
+                if (third == TripleBlockThird.MIDDLE) {
+                    BlockEntity blockEntity = level.getBlockEntity(blockPos);
+                    if (blockEntity instanceof ClawMachineBlockEntity clawMachineBlockEntity) {
+                        clawMachineBlockEntity.setOwner(placer.getUUID());
+                    }
+                }
             }
         }
     }

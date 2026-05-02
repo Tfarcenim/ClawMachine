@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "clawmachine:key"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "i": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:tripwire_hook"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "i"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "clawmachine:key"
+    ]
+  }
+}

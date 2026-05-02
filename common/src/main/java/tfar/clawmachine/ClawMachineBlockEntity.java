@@ -54,6 +54,8 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
 
     UUID activePlayer = Util.NIL_UUID;
 
+    public UUID owner = Util.NIL_UUID;
+
     public static final int DATA_SLOTS = 4;
 
     private final ContainerData containerData = new ContainerData() {
@@ -123,6 +125,11 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         }
     };
 
+    public void setOwner(UUID owner) {
+        this.owner = owner;
+        setChanged();
+    }
+
     public boolean isOccupied() {
         return !Util.NIL_UUID.equals(activePlayer);
     }
@@ -170,6 +177,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         tag.putDouble("win_chance",winChance);
         tag.putInt("timer",timer);
         tag.putInt("progress",progress);
+        tag.putUUID("owner",owner);
     }
 
     @Override
@@ -185,6 +193,7 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
         winChance = tag.getDouble("win_chance");
         timer = tag.getInt("timer");
         progress = tag.getInt("progress");
+        owner = tag.getUUID("owner");
     }
 
     @Nullable
@@ -315,6 +324,9 @@ public class ClawMachineBlockEntity extends BlockEntity implements MenuProvider 
             if (moveToStart && clawPos.equals(defaultClawPos)) {
                 dropItem();
             }
+        }
+        if (progress+200 > timer) {
+            dropItem();
         }
         return moved;
     }
